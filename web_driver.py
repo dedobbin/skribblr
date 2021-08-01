@@ -22,6 +22,23 @@ class WebDriver:
         self.state = skribblr_state_enum.NONE
         time.sleep(1)
     
+    #Will join room and take it's turn in a loop #TODO: catch keyboard exception so can snap out when calling manually
+    def participate(self, room_id):
+        self.join_room(room_id, False)
+        while not self.state == skribblr_state_enum.PLAYING:
+            self.check_game_is_running()
+        
+        while self.state == skribblr_state_enum.PLAYING:
+            to_draw = self.check_player_turn()
+            if to_draw:
+                self.take_turn(to_draw)
+            
+    def take_turn(self, to_draw):
+        print("Taking turn, should draw " + to_draw)
+        self.get_image(to_draw)
+        print("ending now")
+        exit()
+
     def join_room(self, room_id, random_avatar = True):
         print("Joining room " + room_id)
         self.driver.get("https://skribbl.io/?" + room_id)
