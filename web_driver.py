@@ -1,0 +1,196 @@
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException, ElementNotInteractableException, StaleElementReferenceException
+from selenium.webdriver import ActionChains
+
+import time
+from enum import Enum
+from random import randrange
+
+class skribblr_state_enum(Enum):
+    NONE = 0
+    WAITING_TO_START = 1
+    PLAYING = 1
+    DRAWING = 2
+
+class WebDriver:
+    def __init__(self):
+        self.driver = webdriver.Firefox()
+        self.state = skribblr_state_enum.NONE
+        time.sleep(1)
+    
+    def join_room(self, room_id, random_avatar = True):
+        print("Joining room " + room_id)
+        self.driver.get("https://skribbl.io/?" + room_id)
+        try:
+            accept_button = WebDriverWait(self.driver, 3).until(EC.presence_of_element_located((By.CLASS_NAME, 'cmpboxbtnyes')))
+            print("Cookie popup happend")
+            accept_button.click()
+        except TimeoutException:
+            print("Cookie popup did NOT happen")
+
+        time.sleep(0.2) #Wait for cookie pop up to go away
+
+        #Set name
+        input_field = self.driver.find_element_by_id("inputName")
+        action = ActionChains(self.driver)
+        action.move_to_element(input_field)
+        action.click()
+        action.send_keys('SKRIBBLR')
+        action.perform()
+
+        if random_avatar:
+            #It gives you a randomizer button, why didn't i use that.. oh well    
+            for i in range(3):
+                button = self.driver.find_element_by_css_selector('.avatarArrowRight[data-avatarindex="'+ str(i) +'"]')
+                for j in range(randrange(10)):
+                    button.click()
+                    time.sleep(0.1)
+
+        self.driver.find_element_by_css_selector(".loginPanelContent .btn-success").click()
+        self.state = skribblr_state_enum.WAITING_TO_START
+
+    def check_game_is_running(self, wait_time = 3600):
+        print("Waiting for game to start")
+        try:
+            input_chat = WebDriverWait(self.driver, wait_time).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#screenGame:not([style="display:none;"])')))
+            print("debug", input_chat)
+            self.state = skribblr_state_enum.PLAYING
+            return True
+        except TimeoutException:
+            return False
+
+    def check_player_turn(self, wait_time = 3600):
+        if (self.state != skribblr_state_enum.PLAYING):
+            print("Checking for turn when not playing makes no sense")
+            return
+        print ("Waiting for turn")
+        #check if overlay is active with:
+        #document.querySelector('#overlay:not([style="opacity: 0; display: none;"])')
+        
+        try:
+            word_container = WebDriverWait(self.driver, wait_time).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#overlay:not([style*="display: none"]):not([style*="display: none"] .wordContainer:not([style="display: none;"])')))
+            
+            time.sleep(1)
+            answers = self.driver.find_elements_by_css_selector('.wordContainer > .word')
+            if (len(answers) == 0):
+                #Because the WebDriverWait query is very janky, it can trigger on some transitions, very annoying to test because of the short time these screens are active, just do it this ugly way
+                print("FALSE POSITIVE, thought it was it's turn but it's not")
+                return False
+            #print("debug", answers[0])
+            print("Should select a word")
+            i = randrange(2)
+            answer = answers[i].get_attribute('innerText')
+            answers[i].click()
+            print("Selected " + answer)
+            self.state = skribblr_state_enum.DRAWING
+            return answer
+        except TimeoutException:
+            return False
+
+    def get_image(self, search_query):
+        self.driver.execute_script('''window.open("https://www.google.com/","_blank");''')
+        #self.driver.find_element_by_tag_name('body').send_keys(Keys.CONTROL + 'w') 
+        #self.driver.execute_script('''window.open("https://images-go''' + "TEEEEST" + '''ogle.com/","_blank");''')
+        #self.driver.get("https://www.google.com")
+        
+        prev_handle = self.driver.current_window_handle
+        
+        #Find what is index of current tab, select one after that to get to newly opened tab..
+        window_index = -1
+        for i in range(len(self.driver.window_handles)):
+            if self.driver.window_handles[i] == prev_handle:
+                window_index = i
+                break
+        self.driver.switch_to.window(self.driver.window_handles[window_index+1])
+
+        # Cookie popup, kinda nasty to detect so just spam 'accept' no matter if its there or not until we are pretty sure we can use the page
+        should_have_clicked = False
+        while not should_have_clicked:
+            buttons = self.driver.find_elements_by_css_selector('button')
+            #print(len(buttons))
+            if (len(buttons) > 1):
+                print("Cookie popup maybe happend")
+                for b in buttons:
+                    #print(b.get_attribute('innerText'))
+                    #We are not sure if pop up is actually active, or will active, just spam it to get rid of it
+                    #TODO: should work for english too
+                    if "akkoord" in b.get_attribute('innerText'):
+                        for i in range(3):
+                            try:
+                                b.click()
+                            except ElementNotInteractableException:
+                                #Tells us element could not be scrolled into view when clicked,but works just fine?? oh well, let's march on
+                                pass
+                            time.sleep(0.1)
+                        should_have_clicked = True
+                        
+            time.sleep(0.1)
+
+        print("Should have passed cookie wall now")
+
+        #input query
+        input_field = self.driver.find_element_by_css_selector("input")
+        action = ActionChains(self.driver)
+        action.move_to_element(input_field)
+        action.click()
+        action.send_keys(search_query)
+        action.send_keys(Keys.ENTER) 
+        action.perform()
+        time.sleep(1)
+
+        #Find 'images' button
+        all_a = self.driver.find_elements_by_css_selector("a")
+
+        image_link = None
+        for a in all_a:
+            #TODO: should also work in english..
+            if "Afbeeldingen" in a.get_attribute("innerText"):
+                image_link = a.get_attribute("href")
+                break
+
+        #switch to image search
+        if not image_link:
+            print("Could not find image link, aborting........")
+            return None
+        
+        self.driver.get(image_link)
+
+        #<img src="data:image/jpeg;base64
+        #[jsaction^="click"] img[src^="data"]'
+        #Pick first image from grid
+        try:
+            img = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[jsaction^="click"] img[src^="data"]')))
+        except TimeoutException:
+            print("Could not find image, aborting........")
+            return None
+        
+        img.click()
+
+        #Get url of actual image from slide in
+        try:
+            img = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[rel="noopener"] img')))
+        except TimeoutException:
+            print("Could not find image, aborting........")
+            return None
+
+        print("TODO: load image: " + img.get_attribute("src"))
+        #TODO: finish
+        exit()
+
+        #Restore original tab TODO: close
+        self.driver.switch_to.window(prev_handle)
+
+
+    def test(self):
+        self.driver.get("http://www.python.org")
+        assert "Python" in self.driver.title
+        elem = self.driver.find_element_by_name("q")
+        elem.clear()
+        elem.send_keys("pycon")
+        elem.send_keys(Keys.RETURN)
+        assert "No results found." not in self.driver.page_source
+        self.driver.close()
