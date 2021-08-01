@@ -7,21 +7,24 @@ if __name__ == "__main__":
         print("Please provide room ID")
         exit()
 
-    #TODO: what happens when room is already running when joins?
+
+    # test_openCV()
+    # exit()
+
     driver = WebDriver()
     
-    driver.get_image("test")
-    exit()
+    # driver.get_image("test")
+    # exit()
 
-    # driver.join_room(sys.argv[1], False)
-    # while not driver.state == skribblr_state_enum.PLAYING:
-    #     driver.check_game_is_running()
+    driver.join_room(sys.argv[1], False)
+    while not driver.state == skribblr_state_enum.PLAYING:
+        driver.check_game_is_running()
     
-    # while driver.state == skribblr_state_enum.PLAYING:
-    #     to_draw = driver.check_player_turn()
-    #     if to_draw:
-    #         driver.get_image(to_draw)
-    #         print("ending now")
-    #         exit()
+    while driver.state == skribblr_state_enum.PLAYING:
+        to_draw = driver.check_player_turn()
+        if to_draw:
+            driver.get_image(to_draw)
+            print("ending now")
+            exit()
         
 

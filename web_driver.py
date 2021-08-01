@@ -83,6 +83,7 @@ class WebDriver:
             #print("debug", answers[0])
             print("Should select a word")
             i = randrange(2)
+            time.sleep(1)
             answer = answers[i].get_attribute('innerText')
             answers[i].click()
             print("Selected " + answer)
