@@ -5,10 +5,15 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException, ElementNotInteractableException, StaleElementReferenceException
 from selenium.webdriver import ActionChains
-
+import numpy as np
+import requests
 import time
 from enum import Enum
 from random import randrange
+from PIL import Image
+import base64
+import io
+from img import img_resize
 
 class skribblr_state_enum(Enum):
     NONE = 0
@@ -35,9 +40,14 @@ class WebDriver:
             
     def take_turn(self, to_draw):
         print("Taking turn, should draw " + to_draw)
-        self.get_image(to_draw)
-        print("ending now")
-        exit()
+        img = self.get_image(to_draw)
+        size = self.get_canvas_size()
+        img = img_resize(img, *size)
+        self.do_draw(img)
+        print("ending now", img)
+
+    def do_draw(self, img):
+        print("TODO: draw image")
 
     def join_room(self, room_id, random_avatar = True):
         print("Joining room " + room_id)
@@ -74,7 +84,6 @@ class WebDriver:
         print("Waiting for game to start")
         try:
             input_chat = WebDriverWait(self.driver, wait_time).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#screenGame:not([style="display:none;"])')))
-            print("debug", input_chat)
             self.state = skribblr_state_enum.PLAYING
             return True
         except TimeoutException:
@@ -195,13 +204,30 @@ class WebDriver:
             print("Could not find image, aborting........")
             return None
 
-        print("TODO: load image: " + img.get_attribute("src"))
+        #print("TODO: load image: " + img.get_attribute("src"))
         #TODO: finish
-        exit()
+
+        #print(img.get_attribute("src"))
+        url = img.get_attribute("src")
+        if ("data:image" in url):
+            print("TODO: handle base64 encoded images", url)
+            # resp = requests.get(img.get_attribute("src").strip()).content
+            # base64_decoded = base64.b64decode(resp)
+            # image = Image.open(io.BytesIO(base64_decoded))
+            # image = np.array(image)
+            return None
+    
+        resp = requests.get(img.get_attribute("src"), stream=True).raw
+        image = np.asarray(bytearray(resp.read()), dtype="uint8")
 
         #Restore original tab TODO: close
         self.driver.switch_to.window(prev_handle)
 
+        return image
+
+    def get_canvas_size(self):
+        print("TODO: get canvas size")
+        return [200,200]
 
     def test(self):
         self.driver.get("http://www.python.org")

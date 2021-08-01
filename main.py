@@ -8,9 +8,10 @@ if __name__ == "__main__":
         exit()
 
     driver = WebDriver()
-    
-    # driver.get_image("test")
-    # exit()
+    driver.take_turn("test")
 
-    driver.participate(sys.argv[1])
+    # img = driver.get_image("test")
+    # print(img)
+
+    # driver.participate(sys.argv[1])
 
