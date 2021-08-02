@@ -11,12 +11,12 @@ if __name__ == "__main__":
 
     driver = WebDriver()
 
-    #driver.participate(sys.argv[1])
+    driver.participate(sys.argv[1])
 
-    img = driver.get_image("test")
-    img = img_resize(img, 200)
-    img_show(img)
-    driver.do_draw(img)
+    # img = driver.get_image("test")
+    # img = img_resize(img, 200, 200)
+    # img_show(img)
+    # driver.do_draw(img)
 
 
     # driver.join_room(sys.argv[1])

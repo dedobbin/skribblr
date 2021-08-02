@@ -43,13 +43,13 @@ class WebDriver:
         img = self.get_image(to_draw)
         #img_show(img)
         x,y,w,h = self.get_canvas_dimensions()
-        img = img_resize(img, w)
+        img = img_resize(img, w, h)
         img_show(img)
-        self.do_draw(img)
-        print("ending now", img)
+        self.do_draw(img, x, y)
 
-    def do_draw(self, img):
-        print("TODO: draw image")
+    def do_draw(self, img, x = 0, y = 0):
+        print("TODO: draw image to ", x, y)
+        exit()
 
     def join_room(self, room_id, random_avatar = True):
         print("Joining room " + room_id)
@@ -115,6 +115,7 @@ class WebDriver:
             i = randrange(2)
             time.sleep(1)
             answer = answers[i].get_attribute('innerText')
+            #TODO: should get image from other tab here, takes quite some time, can wait with selecting perhaps
             answers[i].click()
             print("Selected " + answer)
             self.state = skribblr_state_enum.DRAWING

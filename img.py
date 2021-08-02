@@ -1,20 +1,19 @@
 import cv2
 
-def img_resize(img, output_w):
-    print("Resize image")
-    #print(img.shape)
+def img_resize(img, output_w, output_h):
+    print("Resize image width to ", output_w, output_h)
 
-    scale_factor = output_w / img.shape[0]
-    if scale_factor < 1:
-        output_h = int(img.shape[1] * scale_factor)
-    else:
-        output_h = int(img.shape[1] / scale_factor)
+    height, width = img.shape[:2]
+    max_height = output_w
+    max_width = output_h
 
-    print("old: ", img.shape)
-    print("new: ", str(output_w) + "," + str(output_h), scale_factor)
+    # only shrink if img is bigger than required
+    if max_height < height or max_width < width:
+        scaling_factor = max_height / float(height)
+        if max_width/float(width) < scaling_factor:
+            scaling_factor = max_width / float(width)
+        resized = cv2.resize(img, None, fx=scaling_factor, fy=scaling_factor, interpolation=cv2.INTER_AREA)
 
-    dim = (output_w, output_h)
-    resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
     return resized
 
 def img_create(data):
