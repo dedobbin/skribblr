@@ -1,5 +1,7 @@
-from web_driver import WebDriver, skribblr_state_enum
 import sys
+from web_driver import WebDriver, skribblr_state_enum
+from img import img_show, img_resize
+
 
 if __name__ == "__main__":
     print("sdfsd")
@@ -8,10 +10,17 @@ if __name__ == "__main__":
         exit()
 
     driver = WebDriver()
-    driver.take_turn("test")
 
-    # img = driver.get_image("test")
-    # print(img)
+    #driver.participate(sys.argv[1])
 
-    # driver.participate(sys.argv[1])
+    img = driver.get_image("test")
+    img = img_resize(img, 200)
+    img_show(img)
+    driver.do_draw(img)
+
+
+    # driver.join_room(sys.argv[1])
+    # driver.take_turn("test")
+
+
 

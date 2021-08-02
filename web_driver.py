@@ -13,7 +13,7 @@ from random import randrange
 from PIL import Image
 import base64
 import io
-from img import img_resize
+from img import img_resize, img_show, img_create
 
 class skribblr_state_enum(Enum):
     NONE = 0
@@ -41,8 +41,10 @@ class WebDriver:
     def take_turn(self, to_draw):
         print("Taking turn, should draw " + to_draw)
         img = self.get_image(to_draw)
-        size = self.get_canvas_size()
-        img = img_resize(img, *size)
+        #img_show(img)
+        x,y,w,h = self.get_canvas_dimensions()
+        img = img_resize(img, w)
+        img_show(img)
         self.do_draw(img)
         print("ending now", img)
 
@@ -103,7 +105,9 @@ class WebDriver:
             time.sleep(1)
             answers = self.driver.find_elements_by_css_selector('.wordContainer > .word')
             if (len(answers) == 0):
-                #Because the WebDriverWait query is very janky, it can trigger on some transitions, very annoying to test because of the short time these screens are active, just do it this ugly way
+                # Because the WebDriverWait query is very janky, it can trigger on some transitions, 
+                # very annoying to test because of the short time these screens are active, just do it this ugly way
+                # although in respect i probably could have halted script execution to test... 
                 print("FALSE POSITIVE, thought it was it's turn but it's not")
                 return False
             #print("debug", answers[0])
@@ -198,6 +202,7 @@ class WebDriver:
         img.click()
 
         #Get url of actual image from slide in
+        time.sleep(1) #It seems when you go too fast, you end up with base64 encoded image data, not sure why this happens and if this actualy fixes it..
         try:
             img = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[rel="noopener"] img')))
         except TimeoutException:
@@ -215,19 +220,24 @@ class WebDriver:
             # base64_decoded = base64.b64decode(resp)
             # image = Image.open(io.BytesIO(base64_decoded))
             # image = np.array(image)
+            # return image
             return None
     
-        resp = requests.get(img.get_attribute("src"), stream=True).raw
-        image = np.asarray(bytearray(resp.read()), dtype="uint8")
-
+        #resp = requests.get(url, stream=True).raw
+        resp = requests.get(url, stream=True).raw
+        img_data = np.asarray(bytearray(resp.read()), dtype="uint8")
+        #image = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
+        img = img_create(img_data)
         #Restore original tab TODO: close
         self.driver.switch_to.window(prev_handle)
 
-        return image
+        return img
 
-    def get_canvas_size(self):
-        print("TODO: get canvas size")
-        return [200,200]
+    def get_canvas_dimensions(self):
+        print("Getting canvas dimensions")
+        e = self.driver.find_element_by_id("canvasGame")
+        #todo: return offset
+        return [ e.location['x'], e.location['x'], e.size['width'],e.size['height'] ]
 
     def test(self):
         self.driver.get("http://www.python.org")
@@ -237,4 +247,5 @@ class WebDriver:
         elem.send_keys("pycon")
         elem.send_keys(Keys.RETURN)
         assert "No results found." not in self.driver.page_source
-        self.driver.close()
+        #self.driver.close()
+        return True
