@@ -7,6 +7,7 @@ def img_resize(img, output_w, output_h):
     max_height = output_w
     max_width = output_h
 
+    resized = img
     # only shrink if img is bigger than required
     if max_height < height or max_width < width:
         scaling_factor = max_height / float(height)
