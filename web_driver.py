@@ -25,7 +25,8 @@ class WebDriver:
     def __init__(self):
         self.driver = webdriver.Firefox()
         self.state = skribblr_state_enum.NONE
-        time.sleep(1)
+        
+        self.selected_color = None
     
     #Will join room and take it's turn in a loop #TODO: catch keyboard exception so can snap out when calling manually
     def participate(self, room_id):
@@ -44,11 +45,39 @@ class WebDriver:
         x,y,w,h = self.get_canvas_dimensions()
         img = img_resize(img, w, h)
         #img_show(img)
-        self.do_draw(img, x, y)
+        self.do_draw(img)
 
-    def do_draw(self, img, x = 0, y = 0):
-        print("TODO: draw image to ", x, y)
+    def do_draw(self, img):
+        print("Will draw some nonsense, TODO: actual pixel data")
+        #TODO: map available colors
+        for i in range(20):
+            self.draw_pixel(i, 40, "000")
         exit()
+
+    def draw_pixel(self, x, y, color):
+        self.select_color(color)
+        #TODO: store so don't have to grab it each pixel..
+        elem = self.driver.find_element_by_id("canvasGame")
+        #For some reason, x,y start is at middle of the canvas, account for that
+        x -= elem.size["width"] / 2
+        y -= elem.size["height"] / 2
+        ac = ActionChains(self.driver)
+        ac.move_to_element(elem).move_by_offset(x, y).click().perform()
+
+
+    def select_color(self, color):
+        if self.selected_color == color:
+            return True
+        
+        print("Will select color " + color)
+        elem = self.driver.find_element_by_css_selector('.colorItem[style*="background: #'+ color + '"]')
+        if elem:
+            elem.click()
+            self.selected_color = color
+            return True
+        else:
+            print("Invalid color: " + color)
+            return False
 
     def join_room(self, room_id, random_avatar = True):
         print("Joining room " + room_id)
