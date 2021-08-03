@@ -43,11 +43,16 @@ class WebDriver:
         self.do_draw(img)
 
     def do_draw(self, img):
-        print("Will draw some nonsense, TODO: actual pixel data")
-        #TODO: map available colors
-        for i in range(20):
-            self.draw_pixel(i, 40, "000")
-        exit()
+        for i in range(1):
+            b,g,r = img[i, 0]
+            rgb_str = "%0x%0x%0x" % (int(r),int(g),int(b))
+
+
+        # print("Will draw some nonsense, TODO: actual pixel data")
+        # #TODO: map available colors
+        # for i in range(20):
+        #     self.draw_pixel(i, 40, "000")
+        # exit()
 
     def draw_pixel(self, x, y, color):
         self.select_color(color)
