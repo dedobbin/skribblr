@@ -16,29 +16,29 @@ import io
 from img import img_resize, img_show, img_create
 
 pickable_colors = {
-    'white': 'FFF',
-    'gray': 'C1C1C1',
-    'red': 'EF130B',
-    'orange': 'FF7100',
-    'yellow': 'FFE400',
-    'green': '00CC00',
-    'light-blue': '00B2FF',
-    'dark-blue': '231FD3',
-    'purple': 'A300BA',
-    'pink': 'D37CAA',
-    'brown': 'A0522D',
+    'white': 0xFFF,
+    'gray': 0xC1C1C1,
+    'red': 0xEF130B,
+    'orange': 0xFF7100,
+    'yellow': 0xFFE400,
+    'green': 0x00CC00,
+    'light-blue': 0x00B2FF,
+    'dark-blue': 0x231FD3,
+    'purple': 0xA300BA,
+    'pink': 0xD37CAA,
+    'brown': 0xA0522D,
 
-    'black': '000',
-    'gray_dark': '4C4C4C',
-    'red_dark': '740B07',
-    'orange_dark': 'C23800',
-    'yellow_dark': 'E8A200',
-    'green_dark': '005510',
-    'light-blue_dark': '00569E',
-    'dark-blue_dark': '0E0865',
-    'purple_dark': '550069',
-    'pink_dark': 'A75574',
-    'brown_dark': '63300D',
+    'black': 0x000,
+    'gray_dark': 0x4C4C4C,
+    'red_dark': 0x740B07,
+    'orange_dark': 0xC23800,
+    'yellow_dark': 0xE8A200,
+    'green_dark': 0x005510,
+    'light-blue_dark': 0x00569E,
+    'dark-blue_dark': 0x0E0865,
+    'purple_dark': 0x550069,
+    'pink_dark': 0xA75574,
+    'brown_dark': 0x63300D
 } 
 
 class WebDriver:
@@ -70,16 +70,17 @@ class WebDriver:
         self.do_draw(img)
 
     def do_draw(self, img):
-        for i in range(1):
-            b,g,r = img[i, 0]
-            rgb_str = "%0x%0x%0x" % (int(r),int(g),int(b))
+        print("TODO draw")
+        for y in range(1):
+            for x in range(1):
+                b,g,r = img[x, y]
+                hex_str = "%0x%0x%0x" % (int(r),int(g),int(b))
+                #print(hex_str)
+                rgb = int(hex_str, 16)
+                #print("%0x" % (rgb))
 
-
-        # print("Will draw some nonsense, TODO: actual pixel data")
-        # #TODO: map available colors
-        # for i in range(20):
-        #     self.draw_pixel(i, 40, "000")
-        # exit()
+                color = self.find_color_closests(rgb)
+                self.draw_pixel(x, y, color)
 
     def draw_pixel(self, x, y, color):
         self.select_color(color)
@@ -91,9 +92,15 @@ class WebDriver:
         ac = ActionChains(self.driver)
         ac.move_to_element(elem).move_by_offset(x, y).click().perform()
 
+    def find_color_closests(self, input):
+        res = min(pickable_colors.values(), key=lambda x: abs(x-input))
+        print("should pick %0x" % (res))
+        return res
 
     def select_color(self, color):
+        color = str(color)
         if self.selected_color == color:
+            print("Keep same color")
             return True
         
         print("Will select color " + color)
