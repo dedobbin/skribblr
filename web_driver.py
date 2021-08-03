@@ -15,26 +15,21 @@ import base64
 import io
 from img import img_resize, img_show, img_create
 
-class skribblr_state_enum(Enum):
-    NONE = 0
-    WAITING_TO_START = 1
-    PLAYING = 1
-    DRAWING = 2
-
 class WebDriver:
     def __init__(self):
         self.driver = webdriver.Firefox()
-        self.state = skribblr_state_enum.NONE
         
         self.selected_color = None
     
     #Will join room and take it's turn in a loop #TODO: catch keyboard exception so can snap out when calling manually
     def participate(self, room_id):
         self.join_room(room_id, False)
-        while not self.state == skribblr_state_enum.PLAYING:
-            self.check_game_is_running()
+        while True:
+            game_is_running = self.check_game_is_running()
+            if game_is_running:
+                break
         
-        while self.state == skribblr_state_enum.PLAYING:
+        while True:
             to_draw = self.check_player_turn()
             if to_draw:
                 self.take_turn(to_draw)
@@ -108,21 +103,16 @@ class WebDriver:
                     time.sleep(0.1)
 
         self.driver.find_element_by_css_selector(".loginPanelContent .btn-success").click()
-        self.state = skribblr_state_enum.WAITING_TO_START
 
     def check_game_is_running(self, wait_time = 3600):
         print("Waiting for game to start")
         try:
             input_chat = WebDriverWait(self.driver, wait_time).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#screenGame:not([style="display:none;"])')))
-            self.state = skribblr_state_enum.PLAYING
             return True
         except TimeoutException:
             return False
 
     def check_player_turn(self, wait_time = 3600):
-        if (self.state != skribblr_state_enum.PLAYING):
-            print("Checking for turn when not playing makes no sense")
-            return
         print ("Waiting for turn")
         #check if overlay is active with:
         #document.querySelector('#overlay:not([style="opacity: 0; display: none;"])')
@@ -146,7 +136,6 @@ class WebDriver:
             #TODO: should get image from other tab here, takes quite some time, can wait with selecting perhaps
             answers[i].click()
             print("Selected " + answer)
-            self.state = skribblr_state_enum.DRAWING
             return answer
         except TimeoutException:
             return False

@@ -1,5 +1,5 @@
 import sys
-from web_driver import WebDriver, skribblr_state_enum
+from web_driver import WebDriver
 from img import img_show, img_resize
 
 
