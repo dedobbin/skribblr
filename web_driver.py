@@ -15,11 +15,38 @@ import base64
 import io
 from img import img_resize, img_show, img_create
 
+pickable_colors = {
+    'white': 'FFF',
+    'gray': 'C1C1C1',
+    'red': 'EF130B',
+    'orange': 'FF7100',
+    'yellow': 'FFE400',
+    'green': '00CC00',
+    'light-blue': '00B2FF',
+    'dark-blue': '231FD3',
+    'purple': 'A300BA',
+    'pink': 'D37CAA',
+    'brown': 'A0522D',
+
+    'black': '000',
+    'gray_dark': '4C4C4C',
+    'red_dark': '740B07',
+    'orange_dark': 'C23800',
+    'yellow_dark': 'E8A200',
+    'green_dark': '005510',
+    'light-blue_dark': '00569E',
+    'dark-blue_dark': '0E0865',
+    'purple_dark': '550069',
+    'pink_dark': 'A75574',
+    'brown_dark': '63300D',
+} 
+
 class WebDriver:
     def __init__(self):
         self.driver = webdriver.Firefox()
         
         self.selected_color = None
+        
     
     #Will join room and take it's turn in a loop #TODO: catch keyboard exception so can snap out when calling manually
     def participate(self, room_id):
