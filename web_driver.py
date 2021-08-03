@@ -107,7 +107,7 @@ class WebDriver:
                 # Because the WebDriverWait query is very janky, it can trigger on some transitions, 
                 # very annoying to test because of the short time these screens are active, just do it this ugly way
                 # although in respect i probably could have halted script execution to test... 
-                print("FALSE POSITIVE, thought it was it's turn but it's not")
+                print("FALSE POSITIVE, thought it was it's turn but it's not - not cannot select the word yet..")
                 return False
             #print("debug", answers[0])
             print("Should select a word")
