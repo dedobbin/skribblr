@@ -41,10 +41,9 @@ class WebDriver:
     def take_turn(self, to_draw):
         print("Taking turn, should draw " + to_draw)
         img = self.get_image(to_draw)
-        #img_show(img)
         x,y,w,h = self.get_canvas_dimensions()
         img = img_resize(img, w, h)
-        img_show(img)
+        #img_show(img)
         self.do_draw(img, x, y)
 
     def do_draw(self, img, x = 0, y = 0):
