@@ -76,10 +76,7 @@ class WebDriver:
             for x in range(img.shape[0]):
                 b,g,r = img[x, y]
                 hex_str = "%0x%0x%0x" % (int(r),int(g),int(b))
-                #print(hex_str)
                 rgb = int(hex_str, 16)
-                #print("%0x" % (rgb))
-
                 color = self.find_color_closests(rgb)
                 self.draw_pixel(x, y, color)
 
@@ -100,10 +97,15 @@ class WebDriver:
         return res
 
     def select_color(self, color):
-        hex_color = ("%0x" % (int(color))).upper()
+        hex_color = ("%06x" % (int(color))).upper()
+        #for some reason black and white have no leading zeros...
+        if hex_color == "000FFF" or hex_color == "000000":
+            hex_color = hex_color[3:]
+        
         if self.selected_color == color:
             #print("Keep same color")
             return True
+        
         elem = self.driver.find_element_by_css_selector('.colorItem[style*="background: #'+ hex_color + '"]')
         if elem:
             elem.click()
