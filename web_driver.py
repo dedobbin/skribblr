@@ -46,6 +46,8 @@ class WebDriver:
         self.driver = webdriver.Firefox()
         
         self.selected_color = None
+
+        self.stored_canvas = None
         
     
     #Will join room and take it's turn in a loop #TODO: catch keyboard exception so can snap out when calling manually
@@ -84,7 +86,7 @@ class WebDriver:
     def draw_pixel(self, x, y, color):
         self.select_color(color)
         #TODO: store so don't have to grab it each pixel..
-        elem = self.driver.find_element_by_id("canvasGame")
+        elem = self.get_canvas()
         #For some reason, x,y start is at middle of the canvas, account for that
         x -= elem.size["width"] / 2
         y -= elem.size["height"] / 2
@@ -110,6 +112,12 @@ class WebDriver:
         else:
             print("Invalid color: " + color)
             return False
+
+    def get_canvas(self, force = False):
+        if force or not self.stored_canvas:
+            self.stored_canvas = self.driver.find_element_by_id("canvasGame")
+        
+        return self.stored_canvas
 
     def join_room(self, room_id, random_avatar = True):
         print("Joining room " + room_id)
@@ -290,7 +298,7 @@ class WebDriver:
 
     def get_canvas_dimensions(self):
         print("Getting canvas dimensions")
-        e = self.driver.find_element_by_id("canvasGame")
+        e = self.get_canvas()
         #todo: return offset
         return [ e.location['x'], e.location['x'], e.size['width'],e.size['height'] ]
 
