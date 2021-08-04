@@ -93,7 +93,7 @@ class WebDriver:
 
     def find_color_closests(self, input):
         res = min(pickable_colors.values(), key=lambda x: abs(x-input))
-        print("should pick %0x" % (res))
+        #print("should pick %0x" % (res))
         return res
 
     def select_color(self, color):
