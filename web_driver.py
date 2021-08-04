@@ -70,9 +70,8 @@ class WebDriver:
         self.do_draw(img)
 
     def do_draw(self, img):
-        print("TODO draw")
-        for y in range(1):
-            for x in range(20):
+        for y in range(img.shape[1]):
+            for x in range(img.shape[0]):
                 b,g,r = img[x, y]
                 hex_str = "%0x%0x%0x" % (int(r),int(g),int(b))
                 #print(hex_str)
@@ -90,7 +89,7 @@ class WebDriver:
         x -= elem.size["width"] / 2
         y -= elem.size["height"] / 2
         ac = ActionChains(self.driver)
-        print("will draw a pixel to ", x, y)
+        #print("will draw a pixel to ", x, y)
         ac.move_to_element(elem).move_by_offset(x, y).click().perform()
 
     def find_color_closests(self, input):
@@ -101,7 +100,7 @@ class WebDriver:
     def select_color(self, color):
         hex_color = ("%0x" % (int(color))).upper()
         if self.selected_color == color:
-            print("Keep same color")
+            #print("Keep same color")
             return True
         elem = self.driver.find_element_by_css_selector('.colorItem[style*="background: #'+ hex_color + '"]')
         if elem:
