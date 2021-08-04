@@ -72,13 +72,26 @@ class WebDriver:
         self.do_draw(img)
 
     def do_draw(self, img):
-        for y in range(img.shape[1]):
-            for x in range(img.shape[0]):
+        y = 0
+        x = 0
+        while y <= img.shape[1]:
+            while x <= img.shape[0]:         
                 b,g,r = img[x, y]
                 hex_str = "%0x%0x%0x" % (int(r),int(g),int(b))
                 rgb = int(hex_str, 16)
                 color = self.find_color_closests(rgb)
                 self.draw_pixel(x, y, color)
+                x += 50   
+            y += 50
+
+        # This is very slow
+        # for y in range(img.shape[1]):
+        #     for x in range(img.shape[0]):
+        #         b,g,r = img[x, y]
+        #         hex_str = "%0x%0x%0x" % (int(r),int(g),int(b))
+        #         rgb = int(hex_str, 16)
+        #         color = self.find_color_closests(rgb)
+        #         self.draw_pixel(x, y, color)
 
     def draw_pixel(self, x, y, color):
         self.select_color(color)
