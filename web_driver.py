@@ -74,14 +74,15 @@ class WebDriver:
                 x,y,w,h = self.get_canvas_dimensions()
                 img = img_resize(img, w, h)
                 #img_show(img)
-                self.do_draw(img)
-                print("Done drawing")
-                return True
             except Exception as e:
                 nthImg += 1
-                print("Couldn't draw image, should get new one..", e)
-                raise e
-                #continue
+                print("Couldn't pick image, should get new one..", e)
+                #raise e
+                continue
+        
+        self.do_draw(img)
+        print("Done drawing")
+        return True
                 
 
     def do_draw(self, img):
@@ -94,8 +95,8 @@ class WebDriver:
                 rgb = int(hex_str, 16)
                 color = self.find_color_closests(rgb)
                 self.draw_pixel(x, y, color)
-                x += 50   
-            y += 50
+                x += 10   
+            y += 10
             x = 0
 
         # This is very slow
@@ -233,11 +234,12 @@ class WebDriver:
 
         # Cookie popup, kinda nasty to detect so just spam 'accept' no matter if its there or not until we are pretty sure we can use the page
         should_have_clicked = False
+        start_time = time.time()
         while not should_have_clicked:
             buttons = self.driver.find_elements_by_css_selector('button')
             #print(len(buttons))
             if (len(buttons) > 1):
-                print("Cookie popup maybe happend")
+                #print("Cookie popup maybe happend")
                 for b in buttons:
                     #print(b.get_attribute('innerText'))
                     #We are not sure if pop up is actually active, or will active, just spam it to get rid of it
@@ -253,6 +255,9 @@ class WebDriver:
                         should_have_clicked = True
                         
             time.sleep(0.1)
+            if (time.time() - start_time > 1.5):
+                print("Seems to be no cookie popup, carry on")
+                break
 
         print("Should have passed cookie wall now")
 
