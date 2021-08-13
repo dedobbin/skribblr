@@ -73,6 +73,7 @@ class WebDriver:
                 img = self.get_image(to_draw, nthImg)
                 x,y,w,h = self.get_canvas_dimensions()
                 img = img_resize(img, w, h)
+                break
                 #img_show(img)
             except Exception as e:
                 nthImg += 1
