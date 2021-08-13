@@ -67,19 +67,23 @@ class WebDriver:
             
     def take_turn(self, to_draw):
         print("Taking turn, should draw " + to_draw)
-        nthImg = 0
+        nth_img = 0
         while True:
             try:
-                img = self.get_image(to_draw, nthImg)
+                img = self.get_image(to_draw, nth_img)
                 x,y,w,h = self.get_canvas_dimensions()
                 img = img_resize(img, w, h)
                 break
                 #img_show(img)
             except Exception as e:
-                nthImg += 1
+                nth_img += 1
                 print("Couldn't pick image, should get new one..", e)
                 #raise e
-                continue
+                if self.is_turn():
+                    continue
+                else:
+                    print("No need to select new image, turn is over")
+                    return
         
         self.do_draw(img)
         print("Done drawing")
