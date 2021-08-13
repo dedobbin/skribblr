@@ -3,7 +3,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, ElementNotInteractableException, StaleElementReferenceException
+from selenium.common.exceptions import TimeoutException, ElementNotInteractableException, StaleElementReferenceException, NoSuchElementException
 from selenium.webdriver import ActionChains
 import numpy as np
 import requests
@@ -14,6 +14,7 @@ from PIL import Image
 import base64
 import io
 from img import img_resize, img_show, img_create
+
 
 pickable_colors = {
     'white': 0xFFF,
@@ -48,6 +49,7 @@ class WebDriver:
         self.selected_color = None
 
         self.stored_canvas = None
+        time.sleep(1)
         
     
     #Will join room and take it's turn in a loop #TODO: catch keyboard exception so can snap out when calling manually
@@ -65,11 +67,22 @@ class WebDriver:
             
     def take_turn(self, to_draw):
         print("Taking turn, should draw " + to_draw)
-        img = self.get_image(to_draw)
-        x,y,w,h = self.get_canvas_dimensions()
-        img = img_resize(img, w, h)
-        #img_show(img)
-        self.do_draw(img)
+        nthImg = 0
+        while True:
+            try:
+                img = self.get_image(to_draw, nthImg)
+                x,y,w,h = self.get_canvas_dimensions()
+                img = img_resize(img, w, h)
+                #img_show(img)
+                self.do_draw(img)
+                print("Done drawing")
+                return True
+            except Exception as e:
+                nthImg += 1
+                print("Couldn't draw image, should get new one..", e)
+                raise e
+                #continue
+                
 
     def do_draw(self, img):
         y = 0
@@ -83,6 +96,7 @@ class WebDriver:
                 self.draw_pixel(x, y, color)
                 x += 50   
             y += 50
+            x = 0
 
         # This is very slow
         # for y in range(img.shape[1]):
@@ -105,6 +119,7 @@ class WebDriver:
         ac.move_to_element(elem).move_by_offset(x, y).click().perform()
 
     def find_color_closests(self, input):
+        #TODO: This doesn't work at all, fix it
         res = min(pickable_colors.values(), key=lambda x: abs(x-input))
         #print("should pick %0x" % (res))
         return res
@@ -119,14 +134,14 @@ class WebDriver:
             #print("Keep same color")
             return True
         
-        elem = self.driver.find_element_by_css_selector('.colorItem[style*="background: #'+ hex_color + '"]')
-        if elem:
-            elem.click()
-            self.selected_color = color
-            return True
-        else:
-            print("Invalid color: " + color)
+        try:
+            elem = self.driver.find_element_by_css_selector('.colorItem[style*="background: #'+ hex_color + '"]')
+        except NoSuchElementException as e:
+            print("Invalid color: ", color)
             return False
+
+        elem.click()
+        self.selected_color = color
 
     def get_canvas(self, force = False):
         if force or not self.stored_canvas:
@@ -200,7 +215,7 @@ class WebDriver:
         except TimeoutException:
             return False
 
-    def get_image(self, search_query):
+    def get_image(self, search_query, n = 0):
         self.driver.execute_script('''window.open("https://www.google.com/","_blank");''')
         #self.driver.find_element_by_tag_name('body').send_keys(Keys.CONTROL + 'w') 
         #self.driver.execute_script('''window.open("https://images-go''' + "TEEEEST" + '''ogle.com/","_blank");''')
@@ -272,7 +287,9 @@ class WebDriver:
         #[jsaction^="click"] img[src^="data"]'
         #Pick first image from grid
         try:
-            img = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[jsaction^="click"] img[src^="data"]')))
+            WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[jsaction^="click"] img[src^="data"]')))
+            imgs =  self.driver.find_elements_by_css_selector('[jsaction^="click"] img[src^="data"')
+            img = imgs[n]
         except TimeoutException:
             print("Could not find image, aborting........")
             return None
@@ -293,7 +310,7 @@ class WebDriver:
         #print(img.get_attribute("src"))
         url = img.get_attribute("src")
         if ("data:image" in url):
-            print("TODO: handle base64 encoded images", url)
+            print("TODO: handle base64 encoded images")
             # resp = requests.get(img.get_attribute("src").strip()).content
             # base64_decoded = base64.b64decode(resp)
             # image = Image.open(io.BytesIO(base64_decoded))
