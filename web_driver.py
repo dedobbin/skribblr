@@ -90,7 +90,14 @@ class WebDriver:
         y = 0
         x = 0
         while y <= img.shape[1]:
-            while x <= img.shape[0]:         
+            while x <= img.shape[0]: 
+
+                try:
+                    self.driver.find_element_by_css_selector('.containerToolbar:not([style*="display: none"])')
+                except NoSuchElementException:
+                    print("not its turn anymore..")
+                    return False
+
                 b,g,r = img[x, y]
                 hex_str = "%0x%0x%0x" % (int(r),int(g),int(b))
                 rgb = int(hex_str, 16)
@@ -99,6 +106,8 @@ class WebDriver:
                 x += 10   
             y += 10
             x = 0
+        
+        return True
 
         # This is very slow
         # for y in range(img.shape[1]):
@@ -141,9 +150,13 @@ class WebDriver:
         except NoSuchElementException as e:
             print("Invalid color: ", color)
             return False
-
-        elem.click()
+        try:
+            elem.click()
+        except ElementNotInteractableException:
+            print("Tried to select color while not it's turn (anymore)")
+            return False
         self.selected_color = color
+        return True
 
     def get_canvas(self, force = False):
         if force or not self.stored_canvas:
@@ -198,7 +211,7 @@ class WebDriver:
             word_container = WebDriverWait(self.driver, wait_time).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#overlay:not([style*="display: none"]):not([style*="display: none"] .wordContainer:not([style="display: none;"])')))
             
             time.sleep(1)
-            answers = self.driver.find_elements_by_css_selector('.wordContainer > .word')
+            answers = self.driver.find_elements_by_css_selector('.wordContainer:not([style*="display: none"]) > .word')
             if (len(answers) == 0):
                 # Because the WebDriverWait query is very janky, it can trigger on some transitions, 
                 # very annoying to test because of the short time these screens are active, just do it this ugly way
