@@ -87,6 +87,7 @@ class WebDriver:
                 
 
     def do_draw(self, img):
+        # This is very slow
         y = 0
         x = 0
         while y <= img.shape[1]:
@@ -95,8 +96,8 @@ class WebDriver:
                 try:
                     self.driver.find_element_by_css_selector('.containerToolbar:not([style*="display: none"])')
                 except NoSuchElementException:
-                    print("not its turn anymore..")
-                    return False
+                    print("Turn is over")
+                    return
 
                 b,g,r = img[x, y]
                 hex_str = "%0x%0x%0x" % (int(r),int(g),int(b))
@@ -107,7 +108,7 @@ class WebDriver:
             y += 10
             x = 0
         
-        return True
+        return
 
         # This is very slow
         # for y in range(img.shape[1]):
