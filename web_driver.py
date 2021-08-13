@@ -84,7 +84,13 @@ class WebDriver:
         self.do_draw(img)
         print("Done drawing")
         return True
-                
+
+    def is_turn(self):
+        try:
+            self.driver.find_element_by_css_selector('.containerToolbar:not([style*="display: none"])')
+            return True
+        except NoSuchElementException:
+            return False
 
     def do_draw(self, img):
         # This is very slow
@@ -93,10 +99,8 @@ class WebDriver:
         while y <= img.shape[1]:
             while x <= img.shape[0]: 
 
-                try:
-                    self.driver.find_element_by_css_selector('.containerToolbar:not([style*="display: none"])')
-                except NoSuchElementException:
-                    print("Turn is over")
+                if (self.is_turn()):
+                    print ("Turn is over")
                     return
 
                 b,g,r = img[x, y]

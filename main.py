@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     driver.participate(sys.argv[1])
 
-    # img = driver.get_image("test", 1)
+    #img = driver.get_image("skinny")
     # img = driver.get_image("a", 2)
 
 
