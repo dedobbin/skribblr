@@ -140,26 +140,27 @@ class WebDriver:
         #print("will draw a pixel to ", x, y)
         ac.move_to_element(elem).move_by_offset(x, y).click().perform()
 
+    # Returns color as seen on page styling
     def find_color_closests(self, input):
         #TODO: This doesn't work at all, fix it
-        res = min(pickable_colors.values(), key=lambda x: abs(x-input))
-        #print("should pick %0x" % (res))
-        return res
+        color = min(pickable_colors.values(), key=lambda x: abs(x-input))
 
-    def select_color(self, color):
         hex_color = ("%06x" % (int(color))).upper()
         #for some reason black and white have no leading zeros...
         if hex_color == "000FFF" or hex_color == "000000":
             hex_color = hex_color[3:]
-        
+
+        return hex_color
+
+    def select_color(self, color):        
         if self.selected_color == color:
             #print("Keep same color")
             return True
         
         try:
-            elem = self.driver.find_element_by_css_selector('.colorItem[style*="background: #'+ hex_color + '"]')
+            elem = self.driver.find_element_by_css_selector('.colorItem[style*="background: #'+ color + '"]')
         except NoSuchElementException as e:
-            print("Invalid color: ", hex_color)
+            print("Invalid color: ", color)
             return False
         try:
             elem.click()
