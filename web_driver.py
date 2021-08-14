@@ -73,8 +73,14 @@ class WebDriver:
                 img = self.get_image(to_draw, nth_img)
                 x,y,w,h = self.get_canvas_dimensions()
                 img = img_resize(img, w, h)
+
+                try:
+                    WebDriverWait(self.driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.containerToolbar:not([style*="display: none"])')))
+                    print("Can start drawing now")
+                except TimeoutException:
+                    print("Wanted to start drawing but color picker didn't show up..")
+
                 break
-                #img_show(img)
             except Exception as e:
                 nth_img += 1
                 print("Couldn't pick image, should get new one..", e)
@@ -93,7 +99,8 @@ class WebDriver:
         try:
             self.driver.find_element_by_css_selector('.containerToolbar:not([style*="display: none"])')
             return True
-        except NoSuchElementException:
+        except NoSuchElementException as e:
+            print("DEBUG: Is not turn", e)
             return False
 
     def do_draw(self, img):
@@ -103,7 +110,7 @@ class WebDriver:
         while y <= img.shape[1]:
             while x <= img.shape[0]: 
 
-                if (self.is_turn()):
+                if (not self.is_turn()):
                     print ("Turn is over")
                     return
 
