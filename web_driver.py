@@ -79,17 +79,12 @@ class WebDriver:
                     print("Can start drawing now")
                 except TimeoutException:
                     print("Wanted to start drawing but color picker didn't show up..")
+                    return
 
                 break
             except Exception as e:
                 nth_img += 1
                 print("Couldn't pick image, should get new one..", e)
-                #raise e
-                if self.is_turn():
-                    continue
-                else:
-                    print("No need to select new image, turn is over")
-                    return
         
         self.do_draw(img)
         print("Done drawing")
@@ -164,7 +159,7 @@ class WebDriver:
         try:
             elem = self.driver.find_element_by_css_selector('.colorItem[style*="background: #'+ hex_color + '"]')
         except NoSuchElementException as e:
-            print("Invalid color: ", color)
+            print("Invalid color: ", hex_color)
             return False
         try:
             elem.click()
