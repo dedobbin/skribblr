@@ -348,11 +348,8 @@ class WebDriver:
 
             #big image that just slided in has url, it's unrecognizable except it has same alt as selected img....
             try:
-                #img = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[rel="noopener"] img')))
-                #'[alt="My 5 Minute Ponytail Routine - KayleyMelissa - YouTube"]'
                 two_imgs =  self.driver.find_elements_by_css_selector('[alt="' + img.get_attribute("alt") + '"]')  
                 img = two_imgs[1]  
-
 
             except TimeoutException:
                 print("Could not find images, aborting........")
