@@ -94,24 +94,17 @@ class WebDriver:
             
     def take_turn(self, to_draw):
         print("Taking turn, should draw " + to_draw)
-        nth_img = 0
-        while True:
-            try:
-                img = self.get_image(to_draw, nth_img)
-                x,y,w,h = self.get_canvas_dimensions()
-                img = img_resize(img, w, h)
+        img = self.get_image(to_draw)
+        x,y,w,h = self.get_canvas_dimensions()
+        img = img_resize(img, w, h)
 
-                try:
-                    WebDriverWait(self.driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.containerToolbar:not([style*="display: none"])')))
-                    print("Can start drawing now")
-                except TimeoutException:
-                    print("Wanted to start drawing but color picker didn't show up..")
-                    return
+        try:
+            WebDriverWait(self.driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.containerToolbar:not([style*="display: none"])')))
+            print("Can start drawing now")
+        except TimeoutException:
+            print("Wanted to start drawing but color picker didn't show up..")
+            return
 
-                break
-            except Exception as e:
-                nth_img += 1
-                print("Couldn't pick image, should get new one..", e)
         
         self.do_draw(img)
         print("Done drawing")
@@ -191,8 +184,7 @@ class WebDriver:
 
     def get_canvas(self, force = False):
         if force or not self.stored_canvas:
-            self.stored_canvas = self.driver.find_element_by_id("canvasGame")
-        
+            self.stored_canvas = WebDriverWait(self.driver, 3).until(EC.presence_of_element_located((By.ID, 'canvasGame')))
         return self.stored_canvas
 
     def join_room(self, room_id, random_avatar = True):
@@ -261,7 +253,9 @@ class WebDriver:
         except TimeoutException:
             return False
 
-    def get_image(self, search_query, n = 0):
+    def get_image(self, search_query):        
+        #ALL EXIT PATHS FROM THIS FUNCTION SHOULD SWITCH BACK TO ORIGINAL TAB, todo: pretty jank to maintain, look into that
+        
         self.driver.execute_script('''window.open("https://www.google.com/","_blank");''')
         #self.driver.find_element_by_tag_name('body').send_keys(Keys.CONTROL + 'w') 
         #self.driver.execute_script('''window.open("https://images-go''' + "TEEEEST" + '''ogle.com/","_blank");''')
@@ -320,6 +314,7 @@ class WebDriver:
         #Find 'images' button
         all_a = self.driver.find_elements_by_css_selector("a")
 
+        #TODO: use xpath to find by content
         image_link = None
         for a in all_a:
             #TODO: should also work in english..
@@ -330,19 +325,20 @@ class WebDriver:
         #switch to image search
         if not image_link:
             print("Could not find image link, aborting........")
+            #Restore original tab TODO: close
+            self.driver.switch_to.window(prev_handle)
             return None
         
         self.driver.get(image_link)
 
-        #<img src="data:image/jpeg;base64
-        #[jsaction^="click"] img[src^="data"]'
-        #Pick first image from grid
         try:
             WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[jsaction^="click"] img[src^="data"]')))
-            imgs =  self.driver.find_elements_by_css_selector('[jsaction^="click"] img[src^="data"')
-            img = imgs[n]
+            imgs =  self.driver.find_elements_by_css_selector('[jsaction^="click"] img[src^="data"')    
+            img = imgs[0]
         except TimeoutException:
             print("Could not find image, aborting........")
+            #Restore original tab TODO: close
+            self.driver.switch_to.window(prev_handle)
             return None
         
         img.click()
@@ -367,6 +363,7 @@ class WebDriver:
             # image = Image.open(io.BytesIO(base64_decoded))
             # image = np.array(image)
             # return image
+            self.driver.switch_to.window(prev_handle)
             return None
     
         #resp = requests.get(url, stream=True).raw
@@ -374,6 +371,7 @@ class WebDriver:
         img_data = np.asarray(bytearray(resp.read()), dtype="uint8")
         #image = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
         img = img_create(img_data)
+        
         #Restore original tab TODO: close
         self.driver.switch_to.window(prev_handle)
 
