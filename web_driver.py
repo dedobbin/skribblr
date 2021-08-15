@@ -173,7 +173,7 @@ class WebDriver:
 
     def select_color(self, color):   
         if self.selected_color == color:
-            print("Keep same color")
+            #print("Keep same color")
             return True
         
         try:
