@@ -334,48 +334,59 @@ class WebDriver:
         try:
             WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[jsaction^="click"] img[src^="data"]')))
             imgs =  self.driver.find_elements_by_css_selector('[jsaction^="click"] img[src^="data"')    
-            img = imgs[0]
         except TimeoutException:
-            print("Could not find image, aborting........")
+            print("Could not find images, aborting........")
             #Restore original tab TODO: close
             self.driver.switch_to.window(prev_handle)
             return None
         
-        img.click()
+        result = None
+        for n in range(10): #Try 10 images max
+            print("Getting image", n)
+            img = imgs[n]
+            img.click()
 
-        #Get url of actual image from slide in
-        time.sleep(1) #It seems when you go too fast, you end up with base64 encoded image data, not sure why this happens and if this actualy fixes it..
-        try:
-            img = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[rel="noopener"] img')))
-        except TimeoutException:
-            print("Could not find image, aborting........")
-            return None
+            #big image that just slided in has url, it's unrecognizable except it has same alt as selected img....
+            try:
+                #img = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[rel="noopener"] img')))
+                #'[alt="My 5 Minute Ponytail Routine - KayleyMelissa - YouTube"]'
+                two_imgs =  self.driver.find_elements_by_css_selector('[alt="' + img.get_attribute("alt") + '"]')  
+                img = two_imgs[1]  
 
-        #print("TODO: load image: " + img.get_attribute("src"))
-        #TODO: finish
 
-        #print(img.get_attribute("src"))
-        url = img.get_attribute("src")
-        if ("data:image" in url):
-            print("TODO: handle base64 encoded images")
-            # resp = requests.get(img.get_attribute("src").strip()).content
-            # base64_decoded = base64.b64decode(resp)
-            # image = Image.open(io.BytesIO(base64_decoded))
-            # image = np.array(image)
-            # return image
-            self.driver.switch_to.window(prev_handle)
-            return None
-    
-        #resp = requests.get(url, stream=True).raw
-        resp = requests.get(url, stream=True).raw
-        img_data = np.asarray(bytearray(resp.read()), dtype="uint8")
-        #image = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
-        img = img_create(img_data)
+            except TimeoutException:
+                print("Could not find images, aborting........")
+                break
+
+            #print("TODO: load image: " + img.get_attribute("src"))
+            #TODO: finish
+
+            #print(img.get_attribute("src"))
+            url = img.get_attribute("src")
+
+            if ("data:image" in url):
+                print("TODO: handle base64 encoded images", img.get_attribute("alt"))
+                # resp = requests.get(img.get_attribute("src").strip()).content
+                # base64_decoded = base64.b64decode(resp)
+                # image = Image.open(io.BytesIO(base64_decoded))
+                # image = np.array(image)
+                # return image
+                continue
+            else:
+                #resp = requests.get(url, stream=True).raw
+                resp = requests.get(url, stream=True).raw
+                img_data = np.asarray(bytearray(resp.read()), dtype="uint8")
+                #image = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
+                result = img_create(img_data)
+                break
         
         #Restore original tab TODO: close
         self.driver.switch_to.window(prev_handle)
 
-        return img
+        if result is None:
+            print("UH OH, couldn't find an image to draw")
+
+        return result
 
     def get_canvas_dimensions(self):
         print("Getting canvas dimensions")
