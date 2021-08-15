@@ -54,7 +54,7 @@ pickable_colors = {
     0x231FD3 : 14,
     0xA300BA : 16,
     0xD37CAA : 18,
-    0xA0522D : 22,
+    0xA0522D : 20,
 
     0x000 : 1,
     0x4C4C4C : 3,
