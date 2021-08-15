@@ -1,8 +1,6 @@
 import cv2
 
 def img_resize(img, output_w, output_h):
-    print("Resize image width to ", output_w, output_h)
-
     height, width = img.shape[:2]
     max_height = output_w
     max_width = output_h

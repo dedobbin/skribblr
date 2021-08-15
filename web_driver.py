@@ -382,8 +382,7 @@ class WebDriver:
     def get_canvas_dimensions(self):
         print("Getting canvas dimensions")
         e = self.get_canvas()
-        #todo: return offset
-        return [ e.location['x'], e.location['x'], e.size['width'],e.size['height'] ]
+        return [ e.location['x'], e.location['y'], e.size['width'],e.size['height'] ]
 
     def test(self):
         self.driver.get("http://www.python.org")
