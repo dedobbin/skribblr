@@ -16,30 +16,57 @@ import io
 from img import img_resize, img_show, img_create
 
 
-pickable_colors = {
-    'white': 0xFFF,
-    'gray': 0xC1C1C1,
-    'red': 0xEF130B,
-    'orange': 0xFF7100,
-    'yellow': 0xFFE400,
-    'green': 0x00CC00,
-    'light-blue': 0x00B2FF,
-    'dark-blue': 0x231FD3,
-    'purple': 0xA300BA,
-    'pink': 0xD37CAA,
-    'brown': 0xA0522D,
+# pickable_colors = {
+#     'white': 0xFFF,
+#     'gray': 0xC1C1C1,
+#     'red': 0xEF130B,
+#     'orange': 0xFF7100,
+#     'yellow': 0xFFE400,
+#     'green': 0x00CC00,
+#     'light-blue': 0x00B2FF,
+#     'dark-blue': 0x231FD3,
+#     'purple': 0xA300BA,
+#     'pink': 0xD37CAA,
+#     'brown': 0xA0522D,
 
-    'black': 0x000,
-    'gray_dark': 0x4C4C4C,
-    'red_dark': 0x740B07,
-    'orange_dark': 0xC23800,
-    'yellow_dark': 0xE8A200,
-    'green_dark': 0x005510,
-    'light-blue_dark': 0x00569E,
-    'dark-blue_dark': 0x0E0865,
-    'purple_dark': 0x550069,
-    'pink_dark': 0xA75574,
-    'brown_dark': 0x63300D
+#     'black': 0x000,
+#     'gray_dark': 0x4C4C4C,
+#     'red_dark': 0x740B07,
+#     'orange_dark': 0xC23800,
+#     'yellow_dark': 0xE8A200,
+#     'green_dark': 0x005510,
+#     'light-blue_dark': 0x00569E,
+#     'dark-blue_dark': 0x0E0865,
+#     'purple_dark': 0x550069,
+#     'pink_dark': 0xA75574,
+#     'brown_dark': 0x63300D
+# } 
+
+# Used to pick color using css selector, '.colorItem[data-color="' + str(pickable_colors[color]) + '"]', way colorItem is styled (background color) is inconsisent
+pickable_colors = {
+    0xFFF : 0,
+    0xC1C1C1 : 2,
+    0xEF130B : 4,
+    0xFF7100 : 6,
+    0xFFE400 : 8,
+    0x00CC00 : 10,
+    0x00B2FF : 12,
+    0x231FD3 : 14,
+    0xA300BA : 16,
+    0xD37CAA : 18,
+    0xA0522D : 22,
+
+    0x000 : 1,
+    0x4C4C4C : 3,
+    0x740B07 : 5,
+    0xC23800 : 7,
+    0xE8A200 : 9,
+    0x005510 : 11,
+    0x00569E : 13,
+    0x0E0865 : 15,
+    0x550069 : 17,
+    0xA75574 : 19,
+    0x63300D : 21
 } 
 
 class WebDriver:
@@ -52,7 +79,7 @@ class WebDriver:
         time.sleep(1)
         
     
-    #Will join room and take it's turn in a loop #TODO: catch keyboard exception so can snap out when calling manually
+    #Will join room and take it's turn in a loop
     def participate(self, room_id):
         self.join_room(room_id, False)
         while True:
@@ -102,9 +129,8 @@ class WebDriver:
         # This is very slow
         y = 0
         x = 0
-        while y <= img.shape[1]:
-            while x <= img.shape[0]: 
-
+        while y < img.shape[1]:
+            while x < img.shape[0]: 
                 if (not self.is_turn()):
                     print ("Turn is over")
                     return
@@ -117,7 +143,7 @@ class WebDriver:
                 x += 10   
             y += 10
             x = 0
-        
+
         return
 
         # This is very slow
@@ -140,27 +166,20 @@ class WebDriver:
         #print("will draw a pixel to ", x, y)
         ac.move_to_element(elem).move_by_offset(x, y).click().perform()
 
-    # Returns color as seen on page styling
     def find_color_closests(self, input):
         #TODO: This doesn't work at all, fix it
-        color = min(pickable_colors.values(), key=lambda x: abs(x-input))
+        color = min(pickable_colors.keys(), key=lambda x: abs(x-input))
+        return color
 
-        hex_color = ("%06x" % (int(color))).upper()
-        #for some reason black and white have no leading zeros...
-        if hex_color == "000FFF" or hex_color == "000000":
-            hex_color = hex_color[3:]
-
-        return hex_color
-
-    def select_color(self, color):        
+    def select_color(self, color):   
         if self.selected_color == color:
-            #print("Keep same color")
+            print("Keep same color")
             return True
         
         try:
-            elem = self.driver.find_element_by_css_selector('.colorItem[style*="background: #'+ color + '"]')
+            elem = self.driver.find_element_by_css_selector('.colorItem[data-color="' + str(pickable_colors[color]) + '"]')
         except NoSuchElementException as e:
-            print("Invalid color: ", color)
+            print("INVALID COLOR: ", color, pickable_colors[color])
             return False
         try:
             elem.click()
@@ -259,6 +278,7 @@ class WebDriver:
         self.driver.switch_to.window(self.driver.window_handles[window_index+1])
 
         # Cookie popup, kinda nasty to detect so just spam 'accept' no matter if its there or not until we are pretty sure we can use the page
+        # TODO: apparently you can use get_element_by_xpath to look for text in element, way easier
         should_have_clicked = False
         start_time = time.time()
         while not should_have_clicked:
