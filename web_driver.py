@@ -259,7 +259,7 @@ class WebDriver:
         self.driver.switch_to.window(self.driver.window_handles[window_index+1])
 
         # Cookie popup, kinda nasty to detect so just spam 'accept' no matter if its there or not until we are pretty sure we can use the page
-        # TODO: apparently you can use get_element_by_xpath to look for text in element, way easier
+        # Apparently you can use get_element_by_xpath to look for text in element, way easier... oh this seems not possible after all
         should_have_clicked = False
         start_time = time.time()
         while not should_have_clicked:
@@ -337,7 +337,6 @@ class WebDriver:
             try:
                 two_imgs =  self.driver.find_elements_by_css_selector('[alt="' + img.get_attribute("alt") + '"]')  
                 img = two_imgs[1]  
-
             except TimeoutException:
                 print("Could not find images, aborting........")
                 break
@@ -347,6 +346,10 @@ class WebDriver:
 
             #print(img.get_attribute("src"))
             url = img.get_attribute("src")
+
+            #DONT FORGET TO REVERT
+            if n == 0:
+                continue
 
             if ("data:image" in url):
                 print("TODO: handle base64 encoded images", img.get_attribute("alt"))
