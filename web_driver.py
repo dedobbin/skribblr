@@ -110,24 +110,17 @@ class WebDriver:
         print("Done drawing")
         return True
 
-    def is_turn(self):
-        try:
-            self.driver.find_element_by_css_selector('.containerToolbar:not([style*="display: none"])')
-            return True
-        except NoSuchElementException as e:
-            print("DEBUG: Is not turn", e)
-            return False
-
     def do_draw(self, img):
         # This is very slow
         y = 0
         x = 0
         while y < img.shape[1]:
             while x < img.shape[0]: 
-                if (not self.is_turn()):
-                    print ("Turn is over")
-                    return
-
+                try:
+                    self.driver.find_element_by_css_selector('.containerToolbar:not([style*="display: none"])')
+                except NoSuchElementException as e:
+                    print("Turn is over", e)
+                    return False
                 b,g,r = img[x, y]
                 hex_str = "%0x%0x%0x" % (int(r),int(g),int(b))
                 rgb = int(hex_str, 16)
