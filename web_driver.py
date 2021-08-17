@@ -171,9 +171,7 @@ class WebDriver:
             self.stored_canvas = WebDriverWait(self.driver, 3).until(EC.presence_of_element_located((By.ID, 'canvasGame')))
         return self.stored_canvas
 
-    def join_room(self, room_id, random_avatar = True):
-        print("Joining room " + room_id)
-        self.driver.get("https://skribbl.io/?" + room_id)
+    def skribbl_cookie_popup(self):
         try:
             accept_button = WebDriverWait(self.driver, 3).until(EC.presence_of_element_located((By.CLASS_NAME, 'cmpboxbtnyes')))
             print("Cookie popup happend")
@@ -182,6 +180,11 @@ class WebDriver:
             print("Cookie popup did NOT happen")
 
         time.sleep(0.2) #Wait for cookie pop up to go away
+
+    def join_room(self, room_id, random_avatar = True):
+        print("Joining room " + room_id)
+        self.driver.get("https://skribbl.io/?" + room_id)
+        self.skribbl_cookie_popup()
 
         #Set name
         input_field = self.driver.find_element_by_id("inputName")
