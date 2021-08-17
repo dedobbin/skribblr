@@ -139,15 +139,6 @@ class WebDriver:
 
         return
 
-        # This is very slow
-        # for y in range(img.shape[1]):
-        #     for x in range(img.shape[0]):
-        #         b,g,r = img[x, y]
-        #         hex_str = "%0x%0x%0x" % (int(r),int(g),int(b))
-        #         rgb = int(hex_str, 16)
-        #         color = self.find_color_closests(rgb)
-        #         self.draw_pixel(x, y, color)
-
     def draw_pixel(self, x, y, color):
         self.select_color(color)
         #TODO: store so don't have to grab it each pixel..
