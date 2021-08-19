@@ -1,7 +1,7 @@
 import sys
 import cv2
 from web_driver import WebDriver
-from img import img_show, img_resize
+from img import img_show, img_resize, img_to_lines
 
 
 if __name__ == "__main__":
@@ -10,11 +10,11 @@ if __name__ == "__main__":
         print("Please provide room ID")
         exit()
 
-    driver = WebDriver()
-
+    #driver = WebDriver()
     #driver.participate(sys.argv[1])
 
-    img = driver.get_image("sdf")
+    img = cv2.imread('/home/dozer/Pictures/thebigballs.jpg')
+    img_to_lines(img)
 
 
     # img = driver.get_image("test")
