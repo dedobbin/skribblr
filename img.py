@@ -1,6 +1,16 @@
 import cv2
 import numpy as np
 
+class Line:
+    def __init__(self, start_pos, end_pos, color):
+        #print("Creating line")
+        self.start_pos = start_pos
+        self.end_pos = end_pos
+        self.color = color
+
+    def __str__(self):
+        return str(self.start_pos) + " to " + str(self.end_pos) + ", color: " + str(self.color)
+
 def img_resize(img, output_w, output_h):
     height, width = img.shape[:2]
     max_height = output_w
@@ -42,19 +52,27 @@ def img_to_lines(img):
                 #print("contains single point", i, n)
                 x = n[i]
                 y = n[i + 1]
-                lines.append([x, y])
+                #TODO: get color
+                lines.append(Line([x, y], None, None))
             else:
                 x1 = n[i]
                 y1 = n[i + 1]
                 x2 = n[i + 2]
                 y2 = n[i + 3]
-                lines.append([x1, y1, x2, y2])
+                #TODO: get color
+                lines.append(Line([x1, y1], [x2, y2], None))
             
             i+=4
-              
-    
-    print(lines)
-    return []            
+
+    # color = (0, 255, 0)
+    # thickness = 3
+    # for line in lines:
+    #     if line.end_pos != None:
+    #         img = cv2.line(img, line.start_pos, line.end_pos, color, thickness)
+
+    img_show(img)
+
+    return lines           
 
     
 
