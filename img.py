@@ -70,7 +70,7 @@ def img_to_lines(img):
     #     if line.end_pos != None:
     #         img = cv2.line(img, line.start_pos, line.end_pos, color, thickness)
 
-    img_show(img)
+    #img_show(img)
 
     return lines           
 

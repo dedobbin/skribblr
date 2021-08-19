@@ -13,7 +13,7 @@ from random import randrange
 from PIL import Image
 import base64
 import io
-from img import img_resize, img_show, img_create
+from img import img_resize, img_show, img_create, img_to_lines
 
 
 # pickable_colors = {
@@ -69,6 +69,10 @@ pickable_colors = {
     0x63300D : 21
 } 
 
+class Draw_mode(Enum):
+    PIXEL = 1
+    LINES = 2
+
 class WebDriver:
     def __init__(self):
         self.driver = webdriver.Firefox()
@@ -92,7 +96,7 @@ class WebDriver:
             if to_draw:
                 self.take_turn(to_draw)
             
-    def take_turn(self, to_draw):
+    def take_turn(self, to_draw, draw_mode = Draw_mode.LINES):
         print("Taking turn, should draw " + to_draw)
         img = self.get_image(to_draw)
         x,y,w,h = self.get_canvas_dimensions()
@@ -105,12 +109,20 @@ class WebDriver:
             print("Wanted to start drawing but color picker didn't show up..")
             return
 
+        if draw_mode == Draw_mode.PIXEL:
+            self.do_draw_pixels(img)
+        elif draw_mode == Draw_mode.LINES:
+            lines = img_to_lines(img)
+            self.do_draw_lines(lines)
         
-        self.do_draw(img)
         print("Done drawing")
         return True
 
-    def do_draw(self, img):
+    def do_draw_lines(self, lines):
+        for line in lines:
+            print("Draw line", line)
+
+    def do_draw_pixels(self, img):
         # This is very slow
         y = 0
         x = 0
