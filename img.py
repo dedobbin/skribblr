@@ -30,7 +30,7 @@ def img_create(data):
     image = cv2.imdecode(data, cv2.IMREAD_COLOR)
     return image
 
-def img_to_lines(img):
+def vectorize(img):
     src_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     src_gray = cv2.blur(src_gray, (3,3))
     

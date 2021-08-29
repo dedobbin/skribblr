@@ -1,7 +1,7 @@
 import sys
 import cv2
 from web_driver import WebDriver
-from img import img_show, img_resize, img_to_lines
+from img import img_show, img_resize, vectorize
 
 
 if __name__ == "__main__":
@@ -14,7 +14,7 @@ if __name__ == "__main__":
     driver.participate(sys.argv[1])
 
     # img = cv2.imread('/home/dozer/Pictures/thebigballs.jpg')
-    # img_to_lines(img)
+    # vectorize(img)
 
 
     # img = driver.get_image("test")

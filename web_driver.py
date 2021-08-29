@@ -13,7 +13,7 @@ from random import randrange
 from PIL import Image
 import base64
 import io
-from img import img_resize, img_show, img_create, img_to_lines
+from img import img_resize, img_show, img_create, vectorize
 
 
 # pickable_colors = {
@@ -112,7 +112,7 @@ class WebDriver:
         if draw_mode == Draw_mode.PIXEL:
             self.do_draw_pixels(img)
         elif draw_mode == Draw_mode.LINES:
-            lines = img_to_lines(img)
+            lines = vectorize(img)
             self.do_draw_lines(lines)
         
         print("Done drawing")
@@ -121,6 +121,23 @@ class WebDriver:
     def do_draw_lines(self, lines):
         for line in lines:
             print("Draw line", line)
+            if (line.color == None):
+                color = 0x231FD3
+            else :
+                color = self.find_color_closests(line.color)
+            self.select_color(color)
+            elem = self.get_canvas()
+            #For some reason, x,y start is at middle of the canvas, account for that
+            start_x = line.start_pos[0] - elem.size["width"] / 2
+            start_y = line.start_pos[1] - elem.size["height"] / 2
+            end_pos = line.end_pos if not None else line.start_pos 
+            end_x = end_pos[0] - elem.size["width"] / 2
+            end_y = end_pos[1] - elem.size["height"] / 2
+            print(start_x, start_y, end_x, end_y)
+            ac = ActionChains(self.driver)
+            ac.move_to_element(elem).move_by_offset(start_x, start_y).click().move_by_offset(end_x, end_y).click().perform()
+            
+
 
     def do_draw_pixels(self, img):
         # This is very slow
@@ -146,7 +163,6 @@ class WebDriver:
 
     def draw_pixel(self, x, y, color):
         self.select_color(color)
-        #TODO: store so don't have to grab it each pixel..
         elem = self.get_canvas()
         #For some reason, x,y start is at middle of the canvas, account for that
         x -= elem.size["width"] / 2
