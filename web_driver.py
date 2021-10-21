@@ -347,8 +347,8 @@ class WebDriver:
         self.driver.get(image_link)
 
         try:
-            WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[jsaction^="click"] img[src^="data"]')))
-            imgs =  self.driver.find_elements_by_css_selector('[jsaction^="click"] img[src^="data"')    
+            WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-cid*="GRID_STATE"] img')))
+            imgs =  self.driver.find_elements_by_css_selector('[data-cid*="GRID_STATE"] img')    
         except TimeoutException:
             print("Could not find images, aborting........")
             #Restore original tab TODO: close
@@ -374,10 +374,6 @@ class WebDriver:
 
             #print(img.get_attribute("src"))
             url = img.get_attribute("src")
-
-            #DONT FORGET TO REVERT
-            if n == 0:
-                continue
 
             if ("data:image" in url):
                 print("TODO: handle base64 encoded images", img.get_attribute("alt"))

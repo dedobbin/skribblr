@@ -10,11 +10,11 @@ if __name__ == "__main__":
         print("Please provide room ID")
         exit()
 
-    driver = WebDriver()
-    driver.participate(sys.argv[1])
+    # driver = WebDriver()
+    # driver.participate(sys.argv[1])
 
-    # img = cv2.imread('/home/dozer/Pictures/thebigballs.jpg')
-    # vectorize(img)
+    img = cv2.imread('/home/dozer/Pictures/recreated.png')
+    vectorize(img)
 
 
     # img = driver.get_image("test")
